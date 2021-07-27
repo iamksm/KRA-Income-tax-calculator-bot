@@ -87,7 +87,7 @@ personal_relief = 2400
 def calculate_tax(salary):
 
     taxable_pay = salary - NSSF
-    if salary <= 24000:
+    if salary > 0 and salary <= 24000:
         income_tax = taxable_pay * 0.1
 
     if salary > 24000 and salary <= 32333:
@@ -142,10 +142,27 @@ async def calculate_net_pay(ctx, salary):
     personal_relief = 2400
 
     salary = int(salary)
+    if salary >= 0 and salary <= 23999:
+        embed = discord.Embed(
+            title="KRA TAX CALCULATOR",
+            description="P.A.Y.E is chargeable to persons of employment monthly income of Kshs. 24,000 and above",
+            color=discord.Color.red(),
+        )
+        embed.set_thumbnail(
+            url="https://pbs.twimg.com/profile_images/1412006848857772032/9txppbC0.jpg"
+        )
+
+        return await ctx.send(embed=embed)
+
     taxable_pay = salary - NSSF
     income_tax = calculate_tax(salary)
     nhif = nhif_calculator(salary)
-    PAYE = income_tax - personal_relief
+
+    if salary >= 24000:
+        PAYE = income_tax - personal_relief
+    else:
+        PAYE = 0
+
     pay_after_tax = taxable_pay - PAYE
     net_pay = pay_after_tax - nhif
 
