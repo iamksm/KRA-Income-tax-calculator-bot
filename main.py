@@ -145,7 +145,7 @@ async def calculate_net_pay(ctx, salary):
     if salary >= 0 and salary <= 23999:
         embed = discord.Embed(
             title="KRA TAX CALCULATOR",
-            description="P.A.Y.E is chargeable to persons of employment monthly income of Kshs. 24,000 and above",
+            description="P.A.Y.E is chargeable to persons of employment with monthly income of Kshs. 24,000 and above",
             color=discord.Color.red(),
         )
         embed.set_thumbnail(
@@ -164,7 +164,7 @@ async def calculate_net_pay(ctx, salary):
         PAYE = 0
 
     pay_after_tax = taxable_pay - PAYE
-    net_pay = pay_after_tax - nhif
+    net_pay = pay_after_tax - nhif - 20
 
     format_currency = babel.numbers.format_currency
 
@@ -218,6 +218,108 @@ async def calculate_net_pay(ctx, salary):
     embed.add_field(name="NET PAY", value=net_pay.replace("Ksh", "Ksh "), inline=False),
 
     await ctx.send(embed=embed)
+
+
+@client.event
+async def on_message(amount):
+    if amount.author == client.user:
+        return
+
+    if str(amount.channel.type) == "private":
+        NSSF = 200
+        personal_relief = 2400
+        try:
+            salary = int(amount.content)
+        except ValueError:
+            embed = discord.Embed(
+                title="KRA TAX CALCULATOR",
+                description="I can only compute Integers",
+                color=discord.Color.red(),
+            )
+            embed.set_thumbnail(
+                url="https://pbs.twimg.com/profile_images/1412006848857772032/9txppbC0.jpg"
+            )
+            return await amount.channel.send(embed=embed)
+
+        if salary >= 0 and salary <= 23999:
+            embed = discord.Embed(
+                title="KRA TAX CALCULATOR",
+                description="P.A.Y.E is chargeable to persons of employment with monthly income of Kshs. 24,000 and above",
+                color=discord.Color.red(),
+            )
+            embed.set_thumbnail(
+                url="https://pbs.twimg.com/profile_images/1412006848857772032/9txppbC0.jpg"
+            )
+            return await amount.channel.send(embed=embed)
+
+        taxable_pay = salary - NSSF
+        income_tax = calculate_tax(salary)
+        nhif = nhif_calculator(salary)
+        if salary >= 24000:
+            PAYE = income_tax - personal_relief
+        else:
+            PAYE = 0
+
+        pay_after_tax = taxable_pay - PAYE
+        net_pay = pay_after_tax - nhif - 20
+
+        format_currency = babel.numbers.format_currency
+
+        salary = format_currency(salary, "KES", locale="en_KE")
+        NSSF = format_currency(NSSF, "KES", locale="en_KE")
+        taxable_pay = format_currency(taxable_pay, "KES", locale="en_KE")
+        income_tax = format_currency(income_tax, "KES", locale="en_KE")
+        nhif = format_currency(nhif, "KES", locale="en_KE")
+        PAYE = format_currency(PAYE, "KES", locale="en_KE")
+        pay_after_tax = format_currency(pay_after_tax, "KES", locale="en_KE")
+        net_pay = format_currency(net_pay, "KES", locale="en_KE")
+        personal_relief = format_currency(personal_relief, "KES", locale="en_KE")
+
+        payslip = {
+            "BASIC PAY": salary,
+            "NSSF": NSSF,
+            "TAXABLE PAY": taxable_pay,
+            "INCOME TAX": income_tax,
+            "PERSONAL RELIEF": personal_relief,
+            "P.A.Y.E.": PAYE,
+            "PAY AFTER TAX": pay_after_tax,
+            "NHIF": nhif,
+            "NET PAY": net_pay,
+        }
+
+        print(payslip)
+
+        embed = discord.Embed(
+            title="KRA TAX CALCULATOR",
+            description="INCOME TAX",
+            color=discord.Color.red(),
+        )
+        embed.set_thumbnail(
+            url="https://pbs.twimg.com/profile_images/1412006848857772032/9txppbC0.jpg"
+        )
+        embed.add_field(name="BASIC PAY", value=salary.replace("Ksh", "Ksh ")),
+        embed.add_field(name="NSSF", value=NSSF.replace("Ksh", "Ksh ")),
+        embed.add_field(name="TAXABLE PAY", value=taxable_pay.replace("Ksh", "Ksh ")),
+        embed.add_field(name="INCOME TAX", value=income_tax.replace("Ksh", "Ksh ")),
+        embed.add_field(
+            name="PERSONAL RELIEF", value=personal_relief.replace("Ksh", "Ksh ")
+        ),
+        embed.add_field(name="P.A.Y.E.", value=PAYE.replace("Ksh", "Ksh ")),
+        embed.add_field(
+            name="PAY AFTER TAX", value=pay_after_tax.replace("Ksh", "Ksh ")
+        ),
+        embed.add_field(name="NHIF", value=nhif.replace("Ksh", "Ksh ")),
+        embed.add_field(
+            name="======================================",
+            value="=====================================",
+            inline=False,
+        )
+        embed.add_field(
+            name="NET PAY", value=net_pay.replace("Ksh", "Ksh "), inline=False
+        ),
+
+        await amount.channel.send(embed=embed)
+    await client.process_commands(amount)
 
 
 keep_alive()
