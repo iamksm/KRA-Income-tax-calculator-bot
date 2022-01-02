@@ -109,13 +109,12 @@ def calculate_tax(salary):
     return income_tax
 
 
-client = commands.Bot(command_prefix="!")
+client = commands.Bot(command_prefix="#")
 
 __games__ = [
     (discord.ActivityType.playing, "with iamksm"),
     (discord.ActivityType.watching, "over {guilds} Server"),
-    (discord.ActivityType.watching, "over {members} Members"),
-    (discord.ActivityType.listening, "to ! commands"),
+    (discord.ActivityType.listening, "to # commands"),
 ]
 __gamesTimer__ = 60 * 60  # 60 minutes
 
