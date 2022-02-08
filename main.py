@@ -38,7 +38,6 @@ Ksh. 90,000 to Ksh. 99,999 – Ksh. 1,60
 Ksh. 100,000 and above – Ksh. 1,700
 """
 
-
 def nhif_calculator(salary):
     nhif = 0
 
@@ -79,10 +78,8 @@ def nhif_calculator(salary):
 
     return nhif
 
-
 NSSF = 200
 personal_relief = 2400
-
 
 def calculate_tax(salary):
 
